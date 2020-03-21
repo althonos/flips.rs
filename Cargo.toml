@@ -1,0 +1,30 @@
+[workspace]
+members = ["flips-sys"]
+
+[package]
+name = "flips"
+version = "0.1.0"
+authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
+edition = "2018"
+license = "GPL-3.0"
+description = "Rust bindings to Flips, the Floating IPS patcher."
+repository = "https://github.com/althonos/flips.rs"
+readme = "README.md"
+keywords = ["ips", "bps", "ups", "patch", "rom"]
+categories = ["api-bindings"]
+
+[badges.travis-ci]
+repository = "althonos/flips.rs"
+[badges.codecov]
+repository = "althonos/flips.rs"
+service    = "github"
+[badges.is-it-maintained-issue-resolution]
+repository = "althonos/flips.rs"
+[badges.maintenance]
+status     = "actively-developed"
+
+[dependencies.flips-sys]
+path = "./flips-sys"
+version = "0.1.0"
+[dependencies.err-derive]
+version = "0.2.3"
