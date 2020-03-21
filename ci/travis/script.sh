@@ -5,4 +5,4 @@
 # --- Test with coverage -----------------------------------------------------
 
 log Measuring code coverage
-cargo tarpaulin --release -v --out Xml --ciserver travis-ci
+cargo tarpaulin --release -v --out Xml --ciserver travis-ci --all

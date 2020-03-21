@@ -16,6 +16,7 @@ fn main() {
 
     println!("cargo:rustc-link-lib=ups");
     cc::Build::new()
+        .cpp(true)
         .include("flips")
         .warnings(false)
         .file("flips/libups.cpp")
@@ -23,8 +24,10 @@ fn main() {
 
     println!("cargo:rustc-link-lib=bps");
     cc::Build::new()
+        .cpp(true)
         .include("flips")
         .warnings(false)
+        .file("flips/divsufsort.c")
         .file("flips/crc32.cpp")
         .file("flips/libbps.cpp")
         .file("flips/libbps-suf.cpp")
