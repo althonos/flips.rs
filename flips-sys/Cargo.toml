@@ -4,14 +4,36 @@ version = "0.1.0"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
 build = "build.rs"
-license = "MIT/GPLv3"
+license = "GPL-3.0"
+description = "Raw FFI bindings to Flips, the Floating IPS patcher."
+repository = "https://github.com/althonos/flips.rs"
+readme = "README.md"
+keywords =  ["ips", "bps", "ups", "patch", "rom"]
+categories = ["external-ffi-bindings"]
+include = [
+  "Cargo.toml",
+  "build.rs",
+  "src/*.rs",
+  "flips/*.c",
+  "flips/*.cpp",
+  "flips/*.h",
+  "flips/COPYING*",
+]
+
+[badges.travis-ci]
+repository = "althonos/flips.rs"
+[badges.codecov]
+repository = "althonos/flips.rs"
+service    = "github"
+[badges.is-it-maintained-issue-resolution]
+repository = "althonos/flips.rs"
+[badges.maintenance]
+status     = "actively-developed"
 
 [dependencies]
 libc = "0.2.68"
-
 [build-dependencies]
 cc = "1.0"
-
 [dev-dependencies]
 quickcheck = "0.9"
 quickcheck_macros = "0.9"
