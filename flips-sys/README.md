@@ -36,7 +36,6 @@ let rom = std::fs::read("Fire Emblem 8.rom").unwrap();
 let output = flips::UpsPatch::new(patch).apply(rom)
   .expect("could not apply patch");
 std::fs::write("FE_LonelyMirror.rom", output).unwrap();
-
 ```
 
 ## 📋 Changelog
@@ -47,5 +46,6 @@ in the [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) format.
 
 ## 📜 License
 
-This library is provided under the [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/), since Flips
-itself is GPLv3 software.
+This library is provided under the
+[GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/),
+since Flips itself is GPLv3 software.
