@@ -2,7 +2,7 @@
 
 . $(dirname $0)/functions.sh
 
-# --- Deploy `fastobo-derive-internal` crate ---------------------------------
+# --- Deploy `flips-sys` crate -----------------------------------------------
 
 log Deploying \`flips-sys\` $TRAVIS_TAG
 cargo publish --manifest-path flips-sys/Cargo.toml --token $CRATES_IO_TOKEN
@@ -10,7 +10,7 @@ cargo publish --manifest-path flips-sys/Cargo.toml --token $CRATES_IO_TOKEN
 sleep 10
 cargo update
 
-# --- Deploy `fastobo` crate -------------------------------------------------
+# --- Deploy `flips` crate ---------------------------------------------------
 
 log Deploying \`flips\` v$TRAVIS_TAG
 cargo publish --manifest-path Cargo.toml --token $CRATES_IO_TOKEN

@@ -11,7 +11,7 @@ description = "Rust bindings to Flips, the Floating IPS patcher."
 repository = "https://github.com/althonos/flips.rs"
 readme = "README.md"
 keywords = ["ips", "bps", "ups", "patch", "rom"]
-categories = ["api-bindings"]
+categories = ["api-bindings", "no-std"]
 
 [badges.travis-ci]
 repository = "althonos/flips.rs"
