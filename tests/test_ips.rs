@@ -24,7 +24,7 @@ fn test_apply_to_output() {
 
 #[test]
 fn test_apply_invalid() {
-    let study = flips::UpsPatch::new(DATA1).apply(DATA2);
+    let study = flips::IpsPatch::new(DATA1).apply(DATA2);
     assert_eq!(study.unwrap_err(), flips::Error::Invalid);
 }
 
@@ -34,6 +34,16 @@ fn test_create_identical() {
     assert_eq!(result.unwrap_err(), flips::Error::Identical);
     let result = flips::IpsBuilder::new().source(DATA2).target(DATA2).build();
     assert_eq!(result.unwrap_err(), flips::Error::Identical);
+}
+
+#[test]
+fn test_create_missing_arguments() {
+    let result = flips::IpsBuilder::<&[u8], &[u8]>::new().build();
+    assert_eq!(result.unwrap_err(), flips::Error::Canceled);
+    let result = flips::IpsBuilder::<&[u8], &[u8]>::new().source(DATA1).build();
+    assert_eq!(result.unwrap_err(), flips::Error::Canceled);
+    let result = flips::IpsBuilder::<&[u8], &[u8]>::new().target(DATA1).build();
+    assert_eq!(result.unwrap_err(), flips::Error::Canceled);
 }
 
 #[test]

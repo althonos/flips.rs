@@ -73,6 +73,24 @@ impl Error {
             }
         }
     }
+
+    /// Attempt to create an `Error` from a raw `bpserror`.
+    fn from_bps(e: flips_sys::bps::bpserror) -> Option<Error> {
+        use flips_sys::bps::bpserror::*;
+        match e {
+            bps_ok => None,
+            bps_to_output => Some(Error::ToOutput),
+            bps_not_this => Some(Error::NotThis),
+            bps_broken => Some(Error::Invalid),
+            bps_identical => Some(Error::Identical),
+            bps_too_big => Some(Error::TooBig),
+            bps_out_of_mem => Some(Error::OutOfMem),
+            bps_canceled => Some(Error::Canceled),
+            bps_shut_up_gcc | bps_io => {
+                unreachable!("{:?} should never be used !", e)
+            }
+        }
+    }
 }
 
 pub type Result<T> = core::result::Result<T, Error>;

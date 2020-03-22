@@ -47,7 +47,6 @@ extern "C" {
         accept_wrong_input: bool,
     ) -> bpserror;
 
-
     /// Creates a BPS patch that converts `source` to `target` and stores it to `patch`.
     ///
     /// It is safe to give `{NULL, 0}` as `metadata`.

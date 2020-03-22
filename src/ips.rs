@@ -15,14 +15,14 @@ impl<B: AsRef<[u8]>> IpsPatch<B> {
     /// Load a new IPS patch from an arbitrary sequence of bytes.
     ///
     /// The patch format is not checked, so this method will always succeed,
-    /// but then `IpsPatch.apply` may fail if the patch can't be read.
+    /// but then [`apply`] or [`study`] may fail if the patch can't be read.
     pub fn new(buffer: B) -> Self {
         Self { buffer }
     }
 
     /// Apply the patch to a source.
     #[must_use]
-    pub fn apply<S: AsRef<[u8]>>(&self, source: S) -> Result<FlipsMemory> {
+    pub fn apply<S: AsRef<[u8]>>(&self, source: S) -> Result<IpsOutput> {
         let slice_p = self.buffer.as_ref();
         let slice_s = source.as_ref();
         let mut mem_o = flips_sys::mem::default();
@@ -34,7 +34,7 @@ impl<B: AsRef<[u8]>> IpsPatch<B> {
         };
 
         match Error::from_ips(result) {
-            None => Ok(FlipsMemory::new(mem_o)),
+            None => Ok(IpsOutput::from(FlipsMemory::new(mem_o))),
             Some(error) => Err(error),
         }
     }
@@ -126,7 +126,7 @@ impl<B: AsRef<[u8]>> IpsStudy<B> {
 
 // ---------------------------------------------------------------------------
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct IpsBuilder<S: AsRef<[u8]>, T: AsRef<[u8]>> {
     source: Option<S>,
     target: Option<T>
@@ -151,6 +151,11 @@ impl<S: AsRef<[u8]>, T: AsRef<[u8]>> IpsBuilder<S, T> {
     }
 
     #[must_use]
+    /// Build an IPS patch from `source` to `target`.
+    ///
+    /// # Error
+    /// If either `source` or `target` was not given, this method will
+    /// return [`Error::Canceled`](./enum.Error.html#variant.Canceled).
     pub fn build(&mut self) -> Result<IpsPatch<FlipsMemory>> {
         if self.source.is_none() || self.target.is_none() {
             return Err(Error::Canceled);
