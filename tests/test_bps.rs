@@ -36,3 +36,28 @@ fn test_apply_invalid() {
     let study = flips::BpsPatch::new(DATA1).apply(DATA2);
     assert_eq!(study.unwrap_err(), flips::Error::Invalid);
 }
+
+#[test]
+fn test_create_apply() {
+    let patch = flips::BpsBuilder::new().source(DATA1).target(DATA2).build().unwrap();
+    let output = patch.apply(DATA1).unwrap();
+    assert_eq!(output.as_ref(), DATA2);
+}
+
+#[test]
+fn test_create_identical() {
+    let result = flips::BpsBuilder::new().source(DATA1).target(DATA1).build();
+    assert_eq!(result.unwrap_err(), flips::Error::Identical);
+    let result = flips::BpsBuilder::new().source(DATA2).target(DATA2).build();
+    assert_eq!(result.unwrap_err(), flips::Error::Identical);
+}
+
+#[test]
+fn test_create_missing_arguments() {
+    let result = flips::BpsBuilder::<&[u8], &[u8], &[u8]>::new().build();
+    assert_eq!(result.unwrap_err(), flips::Error::Canceled);
+    let result = flips::BpsBuilder::<&[u8], &[u8], &[u8]>::new().source(DATA1).build();
+    assert_eq!(result.unwrap_err(), flips::Error::Canceled);
+    let result = flips::BpsBuilder::<&[u8], &[u8], &[u8]>::new().target(DATA1).build();
+    assert_eq!(result.unwrap_err(), flips::Error::Canceled);
+}

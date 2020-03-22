@@ -6,6 +6,7 @@ use crate::FlipsMemory;
 
 // ---------------------------------------------------------------------------
 
+/// A patch in the BPS format.
 #[derive(Clone, Debug, PartialEq)]
 pub struct BpsPatch<B: AsRef<[u8]>> {
     buffer: B,
@@ -15,7 +16,7 @@ impl<B: AsRef<[u8]>> BpsPatch<B> {
     /// Load a new BPS patch from an arbitrary sequence of bytes.
     ///
     /// The patch format is not checked, so this method will always succeed,
-    /// but then [`apply`] may fail if the patch can't be read.
+    /// but then [`apply`](#method.apply) may fail if the patch can't be read.
     pub fn new(buffer: B) -> Self {
         Self { buffer }
     }
@@ -78,5 +79,81 @@ impl Deref for BpsOutput {
     type Target = [u8];
     fn deref(&self) -> &Self::Target {
         self.mem.deref()
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+#[derive(Clone, Debug, Default)]
+pub struct BpsBuilder<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]>> {
+    source: Option<S>,
+    target: Option<T>,
+    metadata: Option<M>,
+}
+
+impl<S: AsRef<[u8]>, T: AsRef<[u8]>> BpsBuilder<S, T, &'static[u8]> {
+    /// Create a new builder for an BPS patch.
+    pub fn new() -> Self {
+        Self {
+            source: None,
+            target: None,
+            metadata: None,
+        }
+    }
+}
+
+impl<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]>> BpsBuilder<S, T, M> {
+    /// Set the source buffer for the patch.
+    pub fn source(&mut self, source: S) -> &mut Self {
+        self.source = Some(source);
+        self
+    }
+
+    /// Set the target buffer for the patch.
+    pub fn target(&mut self, target: T) -> &mut Self {
+        self.target = Some(target);
+        self
+    }
+
+    /// Set the metadta buffer for the patch, if any.
+    pub fn metadata<B: Into<Option<M>>>(&mut self, buffer: B) -> &mut Self {
+        self.metadata = buffer.into();
+        self
+    }
+
+    #[must_use]
+    /// Build an BPS patch from `source` to `target` with `metadata` if any.
+    ///
+    /// # Error
+    /// If either `source` or `target` was not given, this method will
+    /// return [`Error::Canceled`](./enum.Error.html#variant.Canceled).
+    pub fn build(&mut self) -> Result<BpsPatch<FlipsMemory>> {
+        if self.source.is_none() || self.target.is_none() {
+            return Err(Error::Canceled);
+        }
+
+        let (source, target) = (self.source.take().unwrap(), self.target.take().unwrap());
+        let (slice_s, slice_t) = (source.as_ref(), target.as_ref());
+        let mut mem_patch = flips_sys::mem::default();
+
+        let result = unsafe {
+            let mem_metadata = match self.metadata.take() {
+                Some(m) => flips_sys::mem::new(m.as_ref().as_ptr() as *mut _, m.as_ref().len()),
+                None => flips_sys::mem::default(),
+            };
+            let mem_s = flips_sys::mem::new(slice_s.as_ptr() as *mut _, slice_s.len());
+            let mem_t = flips_sys::mem::new(slice_t.as_ptr() as *mut _, slice_t.len());
+            flips_sys::bps::bps_create_linear(
+                mem_s,
+                mem_t,
+                mem_metadata,
+                &mut mem_patch as *mut _
+            )
+        };
+
+        match Error::from_bps(result) {
+            None => Ok(BpsPatch::new(FlipsMemory::new(mem_patch))),
+            Some(error) => Err(error),
+        }
     }
 }

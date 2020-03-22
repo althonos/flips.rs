@@ -6,6 +6,7 @@ use crate::FlipsMemory;
 
 // ---------------------------------------------------------------------------
 
+/// A patch in the IPS format.
 #[derive(Clone, Debug, PartialEq)]
 pub struct IpsPatch<B: AsRef<[u8]>> {
     buffer: B,
@@ -15,7 +16,8 @@ impl<B: AsRef<[u8]>> IpsPatch<B> {
     /// Load a new IPS patch from an arbitrary sequence of bytes.
     ///
     /// The patch format is not checked, so this method will always succeed,
-    /// but then [`apply`] or [`study`] may fail if the patch can't be read.
+    /// but then [`apply`](#method.apply) or [`study`](#method.study) may
+    /// fail if the patch can't be read.
     pub fn new(buffer: B) -> Self {
         Self { buffer }
     }
@@ -133,6 +135,7 @@ pub struct IpsBuilder<S: AsRef<[u8]>, T: AsRef<[u8]>> {
 }
 
 impl<S: AsRef<[u8]>, T: AsRef<[u8]>> IpsBuilder<S, T> {
+    /// Create a new builder for an IPS patch.
     pub fn new() -> Self {
         Self {
             source: None,
@@ -140,11 +143,13 @@ impl<S: AsRef<[u8]>, T: AsRef<[u8]>> IpsBuilder<S, T> {
         }
     }
 
+    /// Set the source buffer for the patch.
     pub fn source(&mut self, source: S) -> &mut Self {
         self.source = Some(source);
         self
     }
 
+    /// Set the target buffer for the patch.
     pub fn target(&mut self, target: T) -> &mut Self {
         self.target = Some(target);
         self

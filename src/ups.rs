@@ -6,6 +6,7 @@ use crate::FlipsMemory;
 
 // ---------------------------------------------------------------------------
 
+/// A patch in the UPS format.
 #[derive(Clone, Debug, PartialEq)]
 pub struct UpsPatch<B: AsRef<[u8]>> {
     buffer: B,

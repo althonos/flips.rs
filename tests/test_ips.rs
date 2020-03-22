@@ -29,6 +29,13 @@ fn test_apply_invalid() {
 }
 
 #[test]
+fn test_create_apply() {
+    let patch = flips::IpsBuilder::new().source(DATA1).target(DATA2).build().unwrap();
+    let output = patch.apply(DATA1).unwrap();
+    assert_eq!(output.as_ref(), DATA2);
+}
+
+#[test]
 fn test_create_identical() {
     let result = flips::IpsBuilder::new().source(DATA1).target(DATA1).build();
     assert_eq!(result.unwrap_err(), flips::Error::Identical);
