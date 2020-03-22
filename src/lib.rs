@@ -46,6 +46,7 @@ pub enum Error {
 }
 
 impl Error {
+    /// Attempt to create an `Error` from a raw `ipserror`.
     fn from_ips(e: flips_sys::ips::ipserror) -> Option<Error> {
         use flips_sys::ips::ipserror::*;
         match e {
@@ -60,6 +61,7 @@ impl Error {
         }
     }
 
+    /// Attempt to create an `Error` from a raw `upserror`.
     fn from_ups(e: flips_sys::ups::upserror) -> Option<Error> {
         use flips_sys::ups::upserror::*;
         match e {
@@ -90,7 +92,7 @@ impl FlipsMemory {
         Self { mem }
     }
 
-    // Copy the memory into a buffer managed by Rust.
+    /// Copy the memory into a buffer managed by Rust.
     #[cfg(feature = "std")]
     pub fn into_bytes(self) -> Vec<u8> {
         self.as_ref().to_vec()

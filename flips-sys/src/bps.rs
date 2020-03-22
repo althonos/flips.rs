@@ -1,3 +1,5 @@
+//! Bindings to `libbps.h` to work with BPS patches. 
+
 #![allow(bad_style)]
 
 use super::mem;
@@ -5,20 +7,38 @@ use super::mem;
 #[repr(C)]
 #[derive(Debug, PartialEq)]
 pub enum bpserror {
+    /// Patch applied or created successfully.
     bps_ok,
+    /// You attempted to apply a patch to its output.
     bps_to_output,
+    /// This is not the intended input file for this patch.
     bps_not_this,
+    /// This is not a BPS patch, or it's malformed somehow.
     bps_broken,
+    /// The patch could not be read.
     bps_io,
+    /// The input files are identical.
     bps_identical,
+    /// Somehow, you're asking for something a `size_t` can't represent.
     bps_too_big,
+    /// Memory allocation failure.
     bps_out_of_mem,
+    /// Patch creation was canceled.
     bps_canceled,
+    /// Unused, just kill GCC warning.
     bps_shut_up_gcc,
 }
 
 #[link(name="bps")]
 extern "C" {
+
+    /// Applies the BPS patch to the ROM in `in_` and puts it in `out`.
+    ///
+    /// Metadata, if present and requested, (`metadata` is not NULL), is also
+    /// returned. Send both output to `bps_free` when you're done with them.
+    ///
+    /// If `accept_wrong_input` is true, it may return `bps_to_output` or
+    /// `bps_not_this`, while putting non-NULL in `out`/`metadata`.
     pub fn bps_apply(
         patch: mem,
         in_: mem,
@@ -28,16 +48,15 @@ extern "C" {
     ) -> bpserror;
 
 
-    //Creates a BPS patch that converts source to target and stores it to patch. It is safe to give
-    //  {NULL,0} as metadata.
+    /// Creates a BPS patch that converts `source` to `target` and stores it to `patch`.
+    ///
+    /// It is safe to give `{NULL, 0}` as `metadata`.
     pub fn bps_create_linear(
         source: mem,
         target: mem,
         metadata: mem,
         patch: *mut mem
     ) -> bpserror;
-
-
 }
 
 

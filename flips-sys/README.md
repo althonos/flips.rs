@@ -20,11 +20,11 @@ known to create the smallest BPS and IPS files among all widely used patchers.
 This library provides a safe API to create and apply patches to arbitrary
 sources.
 
-| Format | Apply | Create | Metadata |
-| ------ | ----- | ------ | -------- |
-| UPS    | ✔️     |        |          |
-| IPS    | ✔️     | ✔️      |          |
-| BPS    | ✔️     | ✔️      | ✔️        |
+| Format | Apply | Create | Metadata | Study |
+| ------ | ----- | ------ | -------- | ----- |
+| UPS    | ✔️     |        |          |       |
+| IPS    | ✔️     | ✔️      |          | ✔️     |
+| BPS    | ✔️     | ✔️      | ✔️        |       |
 
 ## 🔌 Usage
 
