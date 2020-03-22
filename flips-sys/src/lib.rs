@@ -1,3 +1,4 @@
+#![no_std]
 #![allow(bad_style)]
 
 extern crate libc;
@@ -27,14 +28,14 @@ impl mem {
 
 impl Default for mem {
     fn default() -> Self {
-        Self::new(std::ptr::null_mut(), 0)
+        Self::new(core::ptr::null_mut(), 0)
     }
 }
 
 impl AsRef<[u8]> for mem {
     fn as_ref(&self) -> &[u8] {
         unsafe {
-            std::slice::from_raw_parts(self.ptr as *const _, self.len)
+            core::slice::from_raw_parts(self.ptr as *const _, self.len)
         }
     }
 }
