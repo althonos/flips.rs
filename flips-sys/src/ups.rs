@@ -1,11 +1,11 @@
-//! Bindings to `libups.h` to work with UPS patches. 
+//! Bindings to `libups.h` to work with UPS patches.
 
 #![allow(bad_style)]
 
 use super::mem;
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum upserror {
     /// Patch applied or created successfully.
     ups_ok,

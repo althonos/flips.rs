@@ -1,11 +1,11 @@
-//! Bindings to `libips.h` to work with IPS patches. 
+//! Bindings to `libips.h` to work with IPS patches.
 
 #![allow(bad_style)]
 
 use super::mem;
 
 #[repr(C)]
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ipserror {
     /// Patch applied or created successfully.
     ips_ok,
@@ -29,7 +29,24 @@ pub enum ipserror {
 }
 
 #[repr(C)]
-pub struct ipsstudy { _private: [u8; 0] }
+#[derive(Clone, Debug, PartialEq)]
+pub struct ipsstudy {
+    error: ipserror,
+    outlen_min: libc::c_uint,
+    outlen_max: libc::c_uint,
+    outlen_min_mem: libc::c_uint,
+}
+
+impl Default for ipsstudy {
+    fn default() -> Self {
+        Self {
+            error: ipserror::ips_ok,
+            outlen_min: 0,
+            outlen_max: 0,
+            outlen_min_mem: 0,
+        }
+    }
+}
 
 #[link(name="ips")]
 extern "C" {
@@ -54,7 +71,7 @@ extern "C" {
     /// Apply a patch using a previously made study to avoid recreating a study.
     ///
     /// Since [`ips_apply`](./fn.ips_apply.html) calls [`ips_study`](./fn.ips_study.html)
-    /// before applying the patch, you  should use this function if you have already
+    /// before applying the patch, you should use this function if you have already
     /// created a study beforehand.
     pub fn ips_apply_study(patch: mem, study: *mut ipsstudy, in_: mem, out: *mut mem) -> ipserror;
 }

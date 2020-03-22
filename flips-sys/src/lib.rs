@@ -12,7 +12,10 @@ pub mod bps;
 pub mod ips;
 pub mod ups;
 
-
+/// The representation of a memory slice in the Flips API.
+///
+/// Equivalent to a [`slice`](https://doc.rust-lang.org/std/primitive.slice.html),
+/// but without compile-time checks for mutability and ownership.
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct mem {
@@ -39,7 +42,6 @@ impl AsRef<[u8]> for mem {
         }
     }
 }
-
 
 #[cfg(test)]
 pub mod test_utils {

@@ -1,11 +1,11 @@
-//! Bindings to `libbps.h` to work with BPS patches. 
+//! Bindings to `libbps.h` to work with BPS patches.
 
 #![allow(bad_style)]
 
 use super::mem;
 
 #[repr(C)]
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum bpserror {
     /// Patch applied or created successfully.
     bps_ok,
