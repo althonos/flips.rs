@@ -1,3 +1,39 @@
+//! [![Star me](https://img.shields.io/github/stars/althonos/flips.rs.svg?style=social&label=Star&maxAge=3600)](https://github.com/althonos/flips.rs/stargazers)
+//!
+//! *Rust bindings to [Flips](https://github.com/Alcaro/Flips), the Floating IPS patcher.*
+//!
+//! [![TravisCI](https://img.shields.io/travis/com/althonos/flips.rs/master.svg?maxAge=600&style=flat-square)](https://travis-ci.com/althonos/flips.rs/branches)
+//! [![Codecov](https://img.shields.io/codecov/c/gh/althonos/flips.rs/master.svg?style=flat-square&maxAge=600)](https://codecov.io/gh/althonos/flips.rs)
+//! [![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/gpl-3.0/)
+//! [![Source](https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/flips.rs)
+//! [![Crate](https://img.shields.io/crates/v/flips.svg?maxAge=600&style=flat-square)](https://crates.io/crates/flips)
+//! [![Documentation](https://img.shields.io/badge/docs.rs-latest-4d76ae.svg?maxAge=2678400&style=flat-square)](https://docs.rs/flips)
+//! [![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/flips.rs/blob/master/CHANGELOG.md)
+//! [![GitHub issues](https://img.shields.io/github/issues/althonos/flips.rs.svg?style=flat-square&maxAge=600)](https://github.com/althonos/flips.rs/issues)
+//!
+//! ## 📝 Features
+//!
+//! The following features are all enabled by default, but can be disabled and
+//! cherry-picked using the `default-features = false` option in the `Cargo.toml`
+//! manifest of your project:
+//!
+//! - **`std`**: compile against the Rust standard library, adding proper integration
+//!   with [`std::error::Error`](https://doc.rust-lang.org/std/error/trait.Error.html)
+//!   and [`Vec<u8>`](https://doc.rust-lang.org/std/vec/struct.Vec.html). Disable to
+//!   compile in `no_std` mode.
+//!
+//! ## 📋 Changelog
+//!
+//! This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
+//! and provides a [changelog](https://github.com/althonos/flips.rs/blob/master/CHANGELOG.md)
+//! in the [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) format.
+//!
+//! ## 📜 License
+//!
+//! This library is provided under the
+//! [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/),
+//! since Flips itself is GPLv3 software.
+
 #![cfg_attr(feature = "_doc", feature(doc_cfg, external_doc))]
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -17,6 +53,7 @@ use core::ops::Deref;
 
 // ---------------------------------------------------------------------------
 
+/// The error type for this crate.
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "std", derive(err_derive::Error))]
 pub enum Error {
@@ -35,10 +72,15 @@ pub enum Error {
     /// Attempted to create a patch from identical buffers.
     #[cfg_attr(feature = "std", error(display = "attempted to create a patch from identical buffers"))]
     Identical,
+    /// Attempted to request size larger than [`libc::size_t`] for the target platform.
+    ///
+    /// [`libc::size_t`]: https://docs.rs/libc/latest/libc/type.size_t.html
     #[cfg_attr(feature = "std", error(display = "requested a size larger than `libc::size_t`"))]
     TooBig,
+    /// Memory allocation failed.
     #[cfg_attr(feature = "std", error(display = "memory allocation failed"))]
     OutOfMem,
+    /// Patch creation was canceled.
     #[cfg_attr(feature = "std", error(display = "patch creation was canceled"))]
     Canceled,
 }
@@ -93,25 +135,35 @@ impl Error {
     }
 }
 
+/// The result type for this crate.
 pub type Result<T> = core::result::Result<T, Error>;
 
 // ---------------------------------------------------------------------------
 
 /// A slice of memory owned by `flips`.
+///
+/// You should never have to use this type directly, as each patch format
+/// implements a different output struct that derefs to this type.
 #[derive(Debug)]
 pub struct FlipsMemory {
     mem: flips_sys::mem,
 }
 
 impl FlipsMemory {
+    /// Create a new slice from a raw `flips_sys::mem` value.
     fn new(mem: flips_sys::mem) -> Self {
         Self { mem }
+    }
+
+    /// View the memory buffer as a raw slice of bytes.
+    pub fn as_bytes(&self) -> &[u8] {
+        self.mem.as_ref()
     }
 
     /// Copy the memory into a buffer managed by Rust.
     #[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
     #[cfg(feature = "std")]
-    pub fn into_bytes(self) -> Vec<u8> {
+    pub fn to_bytes(&self) -> Vec<u8> {
         self.as_ref().to_vec()
     }
 }
@@ -141,6 +193,6 @@ impl Drop for FlipsMemory {
 #[cfg(feature = "std")]
 impl Into<Vec<u8>> for FlipsMemory {
     fn into(self) -> Vec<u8> {
-        self.into_bytes()
+        self.to_bytes()
     }
 }

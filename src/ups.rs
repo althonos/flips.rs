@@ -44,6 +44,7 @@ impl<B: AsRef<[u8]>> UpsPatch<B> {
 
 // ---------------------------------------------------------------------------
 
+/// The output created by the application of a UPS patch.
 #[derive(Debug)]
 pub struct UpsOutput {
     mem: FlipsMemory,
@@ -62,8 +63,8 @@ impl AsRef<[u8]> for UpsOutput {
 }
 
 impl Deref for UpsOutput {
-    type Target = [u8];
+    type Target = FlipsMemory;
     fn deref(&self) -> &Self::Target {
-        self.mem.deref()
+        &self.mem
     }
 }

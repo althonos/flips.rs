@@ -45,6 +45,7 @@ impl<B: AsRef<[u8]>> BpsPatch<B> {
 
 // ---------------------------------------------------------------------------
 
+/// The output created by the application of a BPS patch.
 #[derive(Debug)]
 pub struct BpsOutput {
     mem: FlipsMemory,
@@ -52,6 +53,7 @@ pub struct BpsOutput {
 }
 
 impl BpsOutput {
+    /// Create a `BpsOutput` using some metadata.
     fn with_metadata(output: FlipsMemory, metadata: FlipsMemory) -> Self {
         Self {
             mem: output,
@@ -76,28 +78,50 @@ impl AsRef<[u8]> for BpsOutput {
 }
 
 impl Deref for BpsOutput {
-    type Target = [u8];
+    type Target = FlipsMemory;
     fn deref(&self) -> &Self::Target {
-        self.mem.deref()
+        &self.mem
     }
 }
 
 // ---------------------------------------------------------------------------
 
+/// A builder to create a BPS patch.
+///
+/// This type is as generic as possible, making it easy to use any type that
+/// can be viewed as a slice of bytes.
+///
+/// # Example
+/// ```rust
+/// let patch = flips::BpsBuilder::new()
+///     .source(&b"some source bytes"[..])
+///     .target(&b"some target bytes"[..])
+///     .build()
+///     .expect("could not create patch");
+/// ```
 #[derive(Clone, Debug, Default)]
-pub struct BpsBuilder<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]>> {
+pub struct BpsBuilder<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]> = &'static [u8]> {
     source: Option<S>,
     target: Option<T>,
     metadata: Option<M>,
 }
 
-impl<S: AsRef<[u8]>, T: AsRef<[u8]>> BpsBuilder<S, T, &'static[u8]> {
+impl<S: AsRef<[u8]>, T: AsRef<[u8]>> BpsBuilder<S, T, &'static [u8]> {
     /// Create a new builder for an BPS patch.
     pub fn new() -> Self {
         Self {
             source: None,
             target: None,
             metadata: None,
+        }
+    }
+
+    /// Set the metadata buffer for the patch, if any.
+    pub fn metadata<M: AsRef<[u8]>, B: Into<Option<M>>>(&mut self, buffer: B) -> BpsBuilder<S, T, M> {
+        BpsBuilder {
+            source: self.source.take(),
+            target: self.target.take(),
+            metadata: buffer.into(),
         }
     }
 }
@@ -112,12 +136,6 @@ impl<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]>> BpsBuilder<S, T, M> {
     /// Set the target buffer for the patch.
     pub fn target(&mut self, target: T) -> &mut Self {
         self.target = Some(target);
-        self
-    }
-
-    /// Set the metadta buffer for the patch, if any.
-    pub fn metadata<B: Into<Option<M>>>(&mut self, buffer: B) -> &mut Self {
-        self.metadata = buffer.into();
         self
     }
 

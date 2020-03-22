@@ -61,6 +61,7 @@ impl<B: AsRef<[u8]>> IpsPatch<B> {
 
 // ---------------------------------------------------------------------------
 
+/// The output created by the application of an IPS patch.
 #[derive(Debug)]
 pub struct IpsOutput {
     mem: FlipsMemory,
@@ -79,14 +80,19 @@ impl AsRef<[u8]> for IpsOutput {
 }
 
 impl Deref for IpsOutput {
-    type Target = [u8];
+    type Target = FlipsMemory;
     fn deref(&self) -> &Self::Target {
-        self.mem.deref()
+        &self.mem
     }
 }
 
 // ---------------------------------------------------------------------------
 
+/// The result of a study over an IPS patch.
+///
+/// IPS studies allow to detect issues withing a patch before applying it to
+/// a source buffer. It can check for the patch format, detecting if it is
+/// invalid or corrupted.
 #[derive(Clone, Debug)]
 pub struct IpsStudy<B: AsRef<[u8]>> {
     patch: IpsPatch<B>,
@@ -128,6 +134,7 @@ impl<B: AsRef<[u8]>> IpsStudy<B> {
 
 // ---------------------------------------------------------------------------
 
+/// A builder to create an IPS patch.
 #[derive(Clone, Debug, Default)]
 pub struct IpsBuilder<S: AsRef<[u8]>, T: AsRef<[u8]>> {
     source: Option<S>,

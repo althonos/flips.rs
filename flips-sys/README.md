@@ -4,7 +4,7 @@
 
 [![TravisCI](https://img.shields.io/travis/com/althonos/flips.rs/master.svg?maxAge=600&style=flat-square)](https://travis-ci.com/althonos/flips.rs/branches)
 [![Codecov](https://img.shields.io/codecov/c/gh/althonos/flips.rs/master.svg?style=flat-square&maxAge=600)](https://codecov.io/gh/althonos/flips.rs)
-[![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/mit/)
+[![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/gpl-3.0/)
 [![Source](https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/flips.rs)
 [![Crate](https://img.shields.io/crates/v/flips.svg?maxAge=600&style=flat-square)](https://crates.io/crates/flips)
 [![Documentation](https://img.shields.io/badge/docs.rs-latest-4d76ae.svg?maxAge=2678400&style=flat-square)](https://docs.rs/flips)
@@ -44,10 +44,17 @@ let output = flips::UpsPatch::new(patch).apply(rom)
 std::fs::write("FE_LonelyMirror.rom", output).unwrap();
 ```
 
+Check the [online documentation](https://docs.rs/flips) for more examples about
+how to use this library.
+
 ## 📝 Features
 
-- `std` (_**enabled** by default_): compile against the Rust standard library,
-  adding proper integration with [`std::error::Error`](https://doc.rust-lang.org/std/error/trait.Error.html)
+The following features are all enabled by default, but can be disabled and
+cherry-picked using the `default-features = false` option in the `Cargo.toml`
+manifest of your project:
+
+- **`std`**: compile against the Rust standard library, adding proper integration
+  with [`std::error::Error`](https://doc.rust-lang.org/std/error/trait.Error.html)
   and [`Vec<u8>`](https://doc.rust-lang.org/std/vec/struct.Vec.html). Disable to
   compile in `no_std` mode.
 

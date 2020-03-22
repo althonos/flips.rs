@@ -54,10 +54,10 @@ fn test_create_identical() {
 
 #[test]
 fn test_create_missing_arguments() {
-    let result = flips::BpsBuilder::<&[u8], &[u8], &[u8]>::new().build();
+    let result = flips::BpsBuilder::<&[u8], &[u8]>::new().build();
     assert_eq!(result.unwrap_err(), flips::Error::Canceled);
-    let result = flips::BpsBuilder::<&[u8], &[u8], &[u8]>::new().source(DATA1).build();
+    let result = flips::BpsBuilder::<&[u8], &[u8]>::new().source(DATA1).build();
     assert_eq!(result.unwrap_err(), flips::Error::Canceled);
-    let result = flips::BpsBuilder::<&[u8], &[u8], &[u8]>::new().target(DATA1).build();
+    let result = flips::BpsBuilder::<&[u8], &[u8]>::new().target(DATA1).build();
     assert_eq!(result.unwrap_err(), flips::Error::Canceled);
 }
