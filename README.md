@@ -17,6 +17,27 @@
 [Flips](https://github.com/Alcaro/Flips) is a popular patcher for the IPS, BPS
 and UPS formats, typically used to patch ROMs of video game cartridges. It is
 known to create the smallest BPS and IPS files among all widely used patchers.
+This library provides a safe API to create and apply patches to arbitrary
+sources.
+
+## 🔌 Usage
+
+Load a ROM and a patch from two files, apply the patch to the ROM, and then
+write it back to a file:
+
+```rust
+extern crate flips;
+
+// get the input ROM and patch
+let patch = std::fs::read("FE_LonelyMirror_v3_3.ups").unwrap();
+let rom = std::fs::read("Fire Emblem 8.rom").unwrap();
+
+// apply the patch and write the output
+let output = flips::UpsPatch::new(patch).apply(rom)
+  .expect("could not apply patch");
+std::fs::write("FE_LonelyMirror.rom", output).unwrap();
+
+```
 
 ## 📋 Changelog
 
