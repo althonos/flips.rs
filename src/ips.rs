@@ -21,6 +21,7 @@ impl<B: AsRef<[u8]>> IpsPatch<B> {
     }
 
     /// Apply the patch to a source.
+    #[must_use]
     pub fn apply<S: AsRef<[u8]>>(&self, source: S) -> Result<FlipsMemory> {
         let slice_p = self.buffer.as_ref();
         let slice_s = source.as_ref();
@@ -34,6 +35,23 @@ impl<B: AsRef<[u8]>> IpsPatch<B> {
 
         match Error::from_ips(result) {
             None => Ok(FlipsMemory::new(mem_o)),
+            Some(error) => Err(error),
+        }
+    }
+
+    /// Create a study.
+    #[must_use]
+    pub fn study(self) -> Result<IpsStudy<B>> {
+        let slice_p = self.buffer.as_ref();
+        let mut study = flips_sys::ips::ipsstudy::default();
+
+        let result = unsafe {
+            let mem_p = flips_sys::mem::new(slice_p.as_ptr() as *mut _, slice_p.len());
+            flips_sys::ips::ips_study(mem_p, &mut study as *mut _)
+        };
+
+        match Error::from_ips(result) {
+            None => Ok(IpsStudy::new(self, study)),
             Some(error) => Err(error),
         }
     }
@@ -62,6 +80,47 @@ impl Deref for IpsOutput {
     type Target = [u8];
     fn deref(&self) -> &Self::Target {
         self.mem.deref()
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+#[derive(Clone, Debug)]
+pub struct IpsStudy<B: AsRef<[u8]>> {
+    patch: IpsPatch<B>,
+    study: flips_sys::ips::ipsstudy,
+}
+
+impl<B: AsRef<[u8]>> IpsStudy<B> {
+    fn new(patch: IpsPatch<B>, study: flips_sys::ips::ipsstudy) -> Self {
+        Self {
+            patch,
+            study
+        }
+    }
+
+    #[must_use]
+    pub fn apply<S: AsRef<[u8]>>(&self, source: S) -> Result<IpsOutput> {
+        // NB: we have to clone the study because `ips_apply_study` may
+        //     change the study error if an error specific to the output
+        //     is found. Not cloning would cause the error to be stored
+        //     and to invalidate all further calls to `apply`.
+        let mut study = self.study.clone();
+
+        let slice_p = self.patch.buffer.as_ref();
+        let slice_s = source.as_ref();
+        let mut mem_o = flips_sys::mem::default();
+
+        let result = unsafe {
+            let mem_i = flips_sys::mem::new(slice_s.as_ptr() as *mut _, slice_s.len());
+            let mem_p = flips_sys::mem::new(slice_p.as_ptr() as *mut _, slice_p.len());
+            flips_sys::ips::ips_apply_study(mem_p, &mut study as *mut _, mem_i, &mut mem_o as *mut _)
+        };
+
+        match Error::from_ips(result) {
+            None => Ok(IpsOutput::from(FlipsMemory::new(mem_o))),
+            Some(error) => Err(error),
+        }
     }
 }
 
