@@ -1,18 +1,16 @@
+#![cfg_attr(feature = "_doc", feature(doc_cfg, external_doc))]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(feature = "std")]
 extern crate err_derive;
 extern crate flips_sys;
 
-pub mod ips;
-pub mod ups;
-pub mod bps;
+mod ips;
+mod ups;
+mod bps;
 
-#[doc(inline)]
 pub use self::bps::*;
-#[doc(inline)]
 pub use self::ips::*;
-#[doc(inline)]
 pub use self::ups::*;
 
 use core::ops::Deref;
@@ -93,6 +91,7 @@ impl FlipsMemory {
     }
 
     /// Copy the memory into a buffer managed by Rust.
+    #[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
     #[cfg(feature = "std")]
     pub fn into_bytes(self) -> Vec<u8> {
         self.as_ref().to_vec()
@@ -120,6 +119,7 @@ impl Drop for FlipsMemory {
     }
 }
 
+#[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
 #[cfg(feature = "std")]
 impl Into<Vec<u8>> for FlipsMemory {
     fn into(self) -> Vec<u8> {

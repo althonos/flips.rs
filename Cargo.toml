@@ -33,3 +33,7 @@ optional = true
 [features]
 default = ["std"]
 std = ["err-derive"]
+_doc = ["std"]
+
+[package.metadata.docs.rs]
+features = [ "_doc" ]
