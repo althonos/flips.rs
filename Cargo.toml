@@ -28,3 +28,8 @@ path = "./flips-sys"
 version = "0.1.0"
 [dependencies.err-derive]
 version = "0.2.3"
+optional = true
+
+[features]
+default = ["std"]
+std = ["err-derive"]

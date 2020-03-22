@@ -1,3 +1,7 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
+#[cfg(feature = "std")]
+extern crate err_derive;
 extern crate flips_sys;
 
 pub mod ips;
@@ -11,24 +15,33 @@ pub use self::ips::*;
 #[doc(inline)]
 pub use self::ups::*;
 
-use std::ops::Deref;
+use core::ops::Deref;
 
 // ---------------------------------------------------------------------------
 
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "std", derive(err_derive::Error))]
 pub enum Error {
     /// Attempted to apply a patch not made for the input.
+    #[cfg_attr(feature = "std", error(display = "patch is not made for the input"))]
     NotThis,
     /// Attempted to apply a patch to the output ROM.
+    #[cfg_attr(feature = "std", error(display = "attempted to patch the output ROM"))]
     ToOutput,
     /// The patch is invalid or malformed.
+    #[cfg_attr(feature = "std", error(display = "patch is invalid or malformed"))]
     Invalid,
     /// The patch is technically valid, but seems scrambled.
+    #[cfg_attr(feature = "std", error(display = "patch is valid but seems scrambled or corrupted"))]
     Scrambled,
-    Io,
     /// Attempted to create a patch from identical buffers.
+    #[cfg_attr(feature = "std", error(display = "attempted to create a patch from identical buffers"))]
     Identical,
+    #[cfg_attr(feature = "std", error(display = "requested a size larger than `libc::size_t`"))]
     TooBig,
+    #[cfg_attr(feature = "std", error(display = "memory allocation failed"))]
     OutOfMem,
+    #[cfg_attr(feature = "std", error(display = "patch creation was canceled"))]
     Canceled,
 }
 
@@ -62,7 +75,7 @@ impl Error {
     }
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T> = core::result::Result<T, Error>;
 
 // ---------------------------------------------------------------------------
 
@@ -78,6 +91,7 @@ impl FlipsMemory {
     }
 
     // Copy the memory into a buffer managed by Rust.
+    #[cfg(feature = "std")]
     pub fn into_bytes(self) -> Vec<u8> {
         self.as_ref().to_vec()
     }
@@ -104,6 +118,7 @@ impl Drop for FlipsMemory {
     }
 }
 
+#[cfg(feature = "std")]
 impl Into<Vec<u8>> for FlipsMemory {
     fn into(self) -> Vec<u8> {
         self.into_bytes()

@@ -20,6 +20,12 @@ known to create the smallest BPS and IPS files among all widely used patchers.
 This library provides a safe API to create and apply patches to arbitrary
 sources.
 
+| Format | Apply | Create | Metadata |
+| ------ | ----- | ------ | -------- |
+| UPS    | ✔️     |        |          |
+| IPS    | ✔️     | ✔️      |          |
+| BPS    | ✔️     | ✔️      | ✔️        |
+
 ## 🔌 Usage
 
 Load a ROM and a patch from two files, apply the patch to the ROM, and then
@@ -37,6 +43,13 @@ let output = flips::UpsPatch::new(patch).apply(rom)
   .expect("could not apply patch");
 std::fs::write("FE_LonelyMirror.rom", output).unwrap();
 ```
+
+## 📝 Features
+
+- `std` (_**enabled** by default_): compile against the Rust standard library,
+  adding proper integration with [`std::error::Error`](https://doc.rust-lang.org/std/error/trait.Error.html)
+  and [`Vec<u8>`](https://doc.rust-lang.org/std/vec/struct.Vec.html). Disable to
+  compile in `no_std` mode.
 
 ## 📋 Changelog
 
