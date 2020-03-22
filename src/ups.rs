@@ -18,6 +18,11 @@ impl<B: AsRef<[u8]>> UpsPatch<B> {
     }
 
     /// Apply the patch to a source.
+    ///
+    /// # Warning
+    /// Applying a UPS patch to its output will not return any error, but
+    /// generate the input file back again (this is known as *backwargs*
+    /// application in `libups`).
     pub fn apply<S: AsRef<[u8]>>(&self, source: S) -> Result<UpsOutput> {
         let slice_p = self.buffer.as_ref();
         let slice_s = source.as_ref();
