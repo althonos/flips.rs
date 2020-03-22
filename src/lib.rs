@@ -1,5 +1,16 @@
 extern crate flips_sys;
 
+pub mod ips;
+pub mod ups;
+pub mod bps;
+
+#[doc(inline)]
+pub use self::bps::*;
+#[doc(inline)]
+pub use self::ips::*;
+#[doc(inline)]
+pub use self::ups::*;
+
 use std::ops::Deref;
 
 // ---------------------------------------------------------------------------
@@ -53,10 +64,10 @@ impl Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-
 // ---------------------------------------------------------------------------
 
 /// A slice of memory owned by `flips`.
+#[derive(Debug)]
 pub struct FlipsMemory {
     mem: flips_sys::mem,
 }
@@ -96,91 +107,5 @@ impl Drop for FlipsMemory {
 impl Into<Vec<u8>> for FlipsMemory {
     fn into(self) -> Vec<u8> {
         self.into_bytes()
-    }
-}
-
-// ---------------------------------------------------------------------------
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct IpsPatch<B: AsRef<[u8]>> {
-    buffer: B,
-}
-
-impl<B: AsRef<[u8]>> IpsPatch<B> {
-    /// Load a new IPS patch from an arbitrary sequence of bytes.
-    ///
-    /// The patch format is not checked, so this method will always succeed,
-    /// but then `IpsPatch.apply` may fail if the patch can't be read.
-    pub fn new(buffer: B) -> Self {
-        Self { buffer }
-    }
-
-    /// Apply the patch to a source.
-    pub fn apply<S: AsRef<[u8]>>(&self, source: S) -> Result<FlipsMemory> {
-        let slice_p = self.buffer.as_ref();
-        let slice_s = source.as_ref();
-        let mut mem_o = flips_sys::mem::default();
-
-        let result = unsafe {
-            let mem_i = flips_sys::mem::new(slice_s.as_ptr() as *mut _, slice_s.len());
-            let mem_p = flips_sys::mem::new(slice_p.as_ptr() as *mut _, slice_p.len());
-            flips_sys::ips::ips_apply(mem_p, mem_i, &mut mem_o as *mut _)
-        };
-
-        match Error::from_ips(result) {
-            None => Ok(FlipsMemory::new(mem_o)),
-            Some(error) => Err(error),
-        }
-    }
-}
-
-impl IpsPatch<FlipsMemory> {
-    /// Create a new patch.
-    pub fn create<S: AsRef<[u8]>, T: AsRef<[u8]>>(source: S, target: T) -> Result<Self> {
-        let slice_s = source.as_ref();
-        let slice_t = target.as_ref();
-        let mut mem_patch = flips_sys::mem::default();
-
-        let result = unsafe {
-            let mem_s = flips_sys::mem::new(slice_s.as_ptr() as *mut _, slice_s.len());
-            let mem_t = flips_sys::mem::new(slice_t.as_ptr() as *mut _, slice_t.len());
-            flips_sys::ips::ips_create(mem_s, mem_t, &mut mem_patch as *mut _)
-        };
-
-        match Error::from_ips(result) {
-            None => Ok(IpsPatch::new(FlipsMemory::new(mem_patch))),
-            Some(error) => Err(error),
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-
-pub struct UpsPatch<B: AsRef<[u8]>> {
-    buffer: B,
-}
-
-impl<B: AsRef<[u8]>> UpsPatch<B> {
-    /// Load a new UPS patch from an arbitrary sequence of bytes.
-    pub fn new(buffer: B) -> Self {
-        Self { buffer }
-    }
-
-    /// Apply the patch to a source.
-    pub fn apply<S: AsRef<[u8]>>(&self, source: S) -> Result<FlipsMemory> {
-        let slice_p = self.buffer.as_ref();
-        let slice_s = source.as_ref();
-        let mut mem_o = flips_sys::mem::default();
-
-        let result = unsafe {
-            let mem_i = flips_sys::mem::new(slice_s.as_ptr() as *mut _, slice_s.len());
-            let mem_p = flips_sys::mem::new(slice_p.as_ptr() as *mut _, slice_p.len());
-            flips_sys::ups::ups_apply(mem_p, mem_i, &mut mem_o as *mut _)
-        };
-
-        match Error::from_ups(result) {
-            None => Ok(FlipsMemory::new(mem_o)),
-            Some(error) => Err(error),
-        }
     }
 }
