@@ -49,14 +49,17 @@ how to use this library.
 
 ## 📝 Features
 
-The following features are all enabled by default, but can be disabled and
-cherry-picked using the `default-features = false` option in the `Cargo.toml`
-manifest of your project:
+### 📦 `no_std` support
 
-- **`std`**: compile against the Rust standard library, adding proper integration
-  with [`std::error::Error`](https://doc.rust-lang.org/std/error/trait.Error.html)
-  and [`Vec<u8>`](https://doc.rust-lang.org/std/vec/struct.Vec.html). Disable to
-  compile in `no_std` mode.
+`no_std` support for this crate can be opted-in by disabling the **`std`**
+feature. It will disable support of [`std::error::Error`](https://doc.rust-lang.org/std/error/trait.Error.html)
+and [`Vec<u8>`](https://doc.rust-lang.org/std/vec/struct.Vec.html).
+
+### 🧩 CRC32Fast
+
+Flips is patched to use the [`crc32fast`](https://crates.io/crates/crc32fast)
+crate instead of the naive algorithm it used, which greatly improves performances
+when computing checksum of entire patches.
 
 ## 📋 Changelog
 
