@@ -1,35 +1,48 @@
 extern crate cc;
 
 fn main() {
-    let src = std::env::current_dir().unwrap();
-    let flips = src.join("flips");
+    // get the current and output directories
+    let cwd = std::env::current_dir().unwrap();
+    let out = std::env::var("OUT_DIR").unwrap();
+    let ref src = cwd.join("src");
+    let ref flips = cwd.join("flips");
+    let ref patched = std::path::PathBuf::from(out).join("flips");
 
-    println!("cargo:include={}", flips.display());
+    // copy C++ sources refering to `crc32.h` locally to a different folder
+    // to force them to use the one we defined in `src`.
+    std::fs::create_dir_all(patched).ok();
+    for name in &["libups.cpp", "libbps.cpp", "libbps-suf.cpp"] {
+        std::fs::copy(flips.join(name), patched.join(name)).unwrap();
+    }
 
+    // build `lipips`
     println!("cargo:rustc-link-lib=ips");
     cc::Build::new()
         .cpp(true)
-        .include("flips")
+        .include(flips)
         .warnings(true)
-        .file("flips/libips.cpp")
+        .file(flips.join("libips.cpp"))
         .compile("ips");
 
+    // build `lipups`
     println!("cargo:rustc-link-lib=ups");
     cc::Build::new()
         .cpp(true)
-        .include("flips")
+        .include(src)
+        .include(flips)
         .warnings(false)
-        .file("flips/libups.cpp")
+        .file(patched.join("libups.cpp"))
         .compile("libups.a");
 
+    // build `lipbps`
     println!("cargo:rustc-link-lib=bps");
     cc::Build::new()
         .cpp(true)
-        .include("flips")
+        .include(src)
+        .include(flips)
         .warnings(false)
-        .file("flips/divsufsort.c")
-        .file("flips/crc32.cpp")
-        .file("flips/libbps.cpp")
-        .file("flips/libbps-suf.cpp")
+        .file(flips.join("divsufsort.c"))
+        .file(patched.join("libbps.cpp"))
+        .file(patched.join("libbps-suf.cpp"))
         .compile("libbps.a");
 }

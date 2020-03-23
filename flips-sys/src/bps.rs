@@ -63,7 +63,7 @@ extern "C" {
 #[cfg(test)]
 mod tests {
 
-    use std::ops::Deref;
+    use core::ops::Deref;
 
     use super::mem;
     use super::bpserror;
@@ -94,7 +94,7 @@ mod tests {
     #[quickcheck_macros::quickcheck]
     fn check_create_identical(mut source: ArbitraryBuffer) -> bool {
         unsafe {
-            let mut mem_patch = std::mem::MaybeUninit::uninit().assume_init();
+            let mut mem_patch = core::mem::MaybeUninit::uninit().assume_init();
             let result = super::bps_create_linear(source.to_mem(), source.to_mem(), mem::default(), &mut mem_patch as *mut _);
             result == bpserror::bps_identical
         }
@@ -104,7 +104,7 @@ mod tests {
     fn check_create_equal(mut source: ArbitraryBuffer) -> bool {
         let mut target = source.clone();
         unsafe {
-            let mut mem_patch = std::mem::MaybeUninit::uninit().assume_init();
+            let mut mem_patch = core::mem::MaybeUninit::uninit().assume_init();
             let result = super::bps_create_linear(source.to_mem(), target.to_mem(), mem::default(), &mut mem_patch as *mut _);
             result == bpserror::bps_identical
         }

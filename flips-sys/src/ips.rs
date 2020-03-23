@@ -79,7 +79,7 @@ extern "C" {
 #[cfg(test)]
 mod tests {
 
-    use std::ops::Deref;
+    use core::ops::Deref;
 
     use super::mem;
     use super::ipserror;
@@ -110,7 +110,7 @@ mod tests {
     #[quickcheck_macros::quickcheck]
     fn check_create_identical(mut source: ArbitraryBuffer) -> bool {
         unsafe {
-            let mut mem_patch = std::mem::MaybeUninit::uninit().assume_init();
+            let mut mem_patch = core::mem::MaybeUninit::uninit().assume_init();
             let result = super::ips_create(source.to_mem(), source.to_mem(), &mut mem_patch as *mut _);
             result == ipserror::ips_identical
         }
@@ -120,7 +120,7 @@ mod tests {
     fn check_create_equal(mut source: ArbitraryBuffer) -> bool {
         let mut target = source.clone();
         unsafe {
-            let mut mem_patch = std::mem::MaybeUninit::uninit().assume_init();
+            let mut mem_patch = core::mem::MaybeUninit::uninit().assume_init();
             let result = super::ips_create(source.to_mem(), target.to_mem(), &mut mem_patch as *mut _);
             result == ipserror::ips_identical
         }

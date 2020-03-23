@@ -30,10 +30,19 @@ repository = "althonos/flips.rs"
 [badges.maintenance]
 status     = "actively-developed"
 
-[dependencies]
-libc = "0.2.68"
+[dependencies.libc]
+version = "0.2.68"
+[dependencies.crc32fast]
+version = "1.2.0"
+default-features = false
+
 [build-dependencies]
 cc = "1.0"
+
 [dev-dependencies]
 quickcheck = "0.9"
 quickcheck_macros = "0.9"
+
+[features]
+std = ["crc32fast/std"]
+default = ["std"]
