@@ -4,8 +4,8 @@
 
 # --- Compile without features -----------------------------------------------
 
-log Compiling without default features
-cargo check --no-default-features
+log Testing without default features
+cargo test --no-default-features
 
 # --- Test with coverage -----------------------------------------------------
 
