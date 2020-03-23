@@ -26,6 +26,7 @@ status     = "actively-developed"
 [dependencies.flips-sys]
 path = "./flips-sys"
 version = "0.1.0"
+default-features = false
 [dependencies.err-derive]
 version = "0.2.3"
 optional = true
