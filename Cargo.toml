@@ -32,7 +32,7 @@ optional = true
 
 [features]
 default = ["std"]
-std = ["err-derive"]
+std = ["err-derive", "flips-sys/std"]
 _doc = ["std"]
 
 [package.metadata.docs.rs]
