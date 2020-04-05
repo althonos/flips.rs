@@ -196,6 +196,7 @@ pub struct BpsDeltaBuilder<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]> = &'st
     source: Option<S>,
     target: Option<T>,
     metadata: Option<M>,
+    moremem: bool,
 }
 
 impl<S: AsRef<[u8]>, T: AsRef<[u8]>> BpsDeltaBuilder<S, T, &'static [u8]> {
@@ -205,6 +206,7 @@ impl<S: AsRef<[u8]>, T: AsRef<[u8]>> BpsDeltaBuilder<S, T, &'static [u8]> {
             source: None,
             target: None,
             metadata: None,
+            moremem: false,
         }
     }
 
@@ -214,6 +216,7 @@ impl<S: AsRef<[u8]>, T: AsRef<[u8]>> BpsDeltaBuilder<S, T, &'static [u8]> {
             source: self.source.take(),
             target: self.target.take(),
             metadata: buffer.into(),
+            moremem: self.moremem,
         }
     }
 }
@@ -222,6 +225,16 @@ impl<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]>> BpsDeltaBuilder<S, T, M> {
     /// Set the source buffer for the patch.
     pub fn source(&mut self, source: S) -> &mut Self {
         self.source = Some(source);
+        self
+    }
+
+    /// Enable the patcher to use more memory.
+    ///
+    /// According to the Flips documentation, enabling more memory for the
+    /// delta patcher results in about 5x the size of the patch to be used
+    /// as memory.
+    pub fn more_memory(&mut self, moremem: bool) -> &mut Self {
+        self.moremem = moremem;
         self
     }
 
@@ -260,7 +273,7 @@ impl<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]>> BpsDeltaBuilder<S, T, M> {
                 &mut mem_patch as *mut _,
                 core::ptr::null(),
                 core::ptr::null(),
-                false,
+                self.moremem,
             )
         };
 
