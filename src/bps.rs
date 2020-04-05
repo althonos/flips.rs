@@ -93,20 +93,20 @@ impl Deref for BpsOutput {
 ///
 /// # Example
 /// ```rust
-/// let patch = flips::BpsBuilder::new()
+/// let patch = flips::BpsLinearBuilder::new()
 ///     .source(&b"some source bytes"[..])
 ///     .target(&b"some target bytes"[..])
 ///     .build()
 ///     .expect("could not create patch");
 /// ```
 #[derive(Clone, Debug, Default)]
-pub struct BpsBuilder<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]> = &'static [u8]> {
+pub struct BpsLinearBuilder<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]> = &'static [u8]> {
     source: Option<S>,
     target: Option<T>,
     metadata: Option<M>,
 }
 
-impl<S: AsRef<[u8]>, T: AsRef<[u8]>> BpsBuilder<S, T, &'static [u8]> {
+impl<S: AsRef<[u8]>, T: AsRef<[u8]>> BpsLinearBuilder<S, T, &'static [u8]> {
     /// Create a new builder for an BPS patch.
     pub fn new() -> Self {
         Self {
@@ -117,8 +117,8 @@ impl<S: AsRef<[u8]>, T: AsRef<[u8]>> BpsBuilder<S, T, &'static [u8]> {
     }
 
     /// Set the metadata buffer for the patch, if any.
-    pub fn metadata<M: AsRef<[u8]>, B: Into<Option<M>>>(&mut self, buffer: B) -> BpsBuilder<S, T, M> {
-        BpsBuilder {
+    pub fn metadata<M: AsRef<[u8]>, B: Into<Option<M>>>(&mut self, buffer: B) -> BpsLinearBuilder<S, T, M> {
+        BpsLinearBuilder {
             source: self.source.take(),
             target: self.target.take(),
             metadata: buffer.into(),
@@ -126,7 +126,7 @@ impl<S: AsRef<[u8]>, T: AsRef<[u8]>> BpsBuilder<S, T, &'static [u8]> {
     }
 }
 
-impl<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]>> BpsBuilder<S, T, M> {
+impl<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]>> BpsLinearBuilder<S, T, M> {
     /// Set the source buffer for the patch.
     pub fn source(&mut self, source: S) -> &mut Self {
         self.source = Some(source);
@@ -166,6 +166,101 @@ impl<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]>> BpsBuilder<S, T, M> {
                 mem_t,
                 mem_metadata,
                 &mut mem_patch as *mut _
+            )
+        };
+
+        match Error::from_bps(result) {
+            None => Ok(BpsPatch::new(FlipsMemory::new(mem_patch))),
+            Some(error) => Err(error),
+        }
+    }
+}
+
+// --
+
+/// A builder to create a BPS patch.
+///
+/// This type is as generic as possible, making it easy to use any type that
+/// can be viewed as a slice of bytes.
+///
+/// # Example
+/// ```rust
+/// let patch = flips::BpsLinearBuilder::new()
+///     .source(&b"some source bytes"[..])
+///     .target(&b"some target bytes"[..])
+///     .build()
+///     .expect("could not create patch");
+/// ```
+#[derive(Clone, Debug, Default)]
+pub struct BpsDeltaBuilder<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]> = &'static [u8]> {
+    source: Option<S>,
+    target: Option<T>,
+    metadata: Option<M>,
+}
+
+impl<S: AsRef<[u8]>, T: AsRef<[u8]>> BpsDeltaBuilder<S, T, &'static [u8]> {
+    /// Create a new builder for an BPS patch.
+    pub fn new() -> Self {
+        Self {
+            source: None,
+            target: None,
+            metadata: None,
+        }
+    }
+
+    /// Set the metadata buffer for the patch, if any.
+    pub fn metadata<M: AsRef<[u8]>, B: Into<Option<M>>>(&mut self, buffer: B) -> BpsDeltaBuilder<S, T, M> {
+        BpsDeltaBuilder {
+            source: self.source.take(),
+            target: self.target.take(),
+            metadata: buffer.into(),
+        }
+    }
+}
+
+impl<S: AsRef<[u8]>, T: AsRef<[u8]>, M: AsRef<[u8]>> BpsDeltaBuilder<S, T, M> {
+    /// Set the source buffer for the patch.
+    pub fn source(&mut self, source: S) -> &mut Self {
+        self.source = Some(source);
+        self
+    }
+
+    /// Set the target buffer for the patch.
+    pub fn target(&mut self, target: T) -> &mut Self {
+        self.target = Some(target);
+        self
+    }
+
+    #[must_use]
+    /// Build an BPS patch from `source` to `target` with `metadata` if any.
+    ///
+    /// # Error
+    /// If either `source` or `target` was not given, this method will
+    /// return [`Error::Canceled`](./enum.Error.html#variant.Canceled).
+    pub fn build(&mut self) -> Result<BpsPatch<FlipsMemory>> {
+        if self.source.is_none() || self.target.is_none() {
+            return Err(Error::Canceled);
+        }
+
+        let (source, target) = (self.source.take().unwrap(), self.target.take().unwrap());
+        let (slice_s, slice_t) = (source.as_ref(), target.as_ref());
+        let mut mem_patch = flips_sys::mem::default();
+
+        let result = unsafe {
+            let mem_metadata = match self.metadata.take() {
+                Some(m) => flips_sys::mem::new(m.as_ref().as_ptr() as *mut _, m.as_ref().len()),
+                None => flips_sys::mem::default(),
+            };
+            let mem_s = flips_sys::mem::new(slice_s.as_ptr() as *mut _, slice_s.len());
+            let mem_t = flips_sys::mem::new(slice_t.as_ptr() as *mut _, slice_t.len());
+            flips_sys::bps::bps_create_delta_inmem(
+                mem_s,
+                mem_t,
+                mem_metadata,
+                &mut mem_patch as *mut _,
+                core::ptr::null(),
+                core::ptr::null(),
+                false,
             )
         };
 

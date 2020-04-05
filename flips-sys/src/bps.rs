@@ -56,9 +56,17 @@ extern "C" {
         metadata: mem,
         patch: *mut mem
     ) -> bpserror;
+
+    pub fn bps_create_delta_inmem(
+        source: mem,
+        target: mem,
+        metadata: mem,
+        patch: *mut mem,
+        progress: *const libc::c_void, // FIXME
+        userdata: *const libc::c_void,
+        moremem: bool,
+    ) -> bpserror;
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -70,7 +78,7 @@ mod tests {
     use crate::test_utils::ArbitraryBuffer;
 
     #[quickcheck_macros::quickcheck]
-    fn check_create_and_apply(mut source: ArbitraryBuffer, mut target: ArbitraryBuffer) -> bool {
+    fn check_create_linear_and_apply(mut source: ArbitraryBuffer, mut target: ArbitraryBuffer) -> bool {
         if source == target {
             return true;
         }
@@ -79,6 +87,28 @@ mod tests {
             // create patch
             let mut mem_patch = mem::default();
             let result = super::bps_create_linear(source.to_mem(), target.to_mem(), mem::default(), &mut mem_patch as *mut mem);
+            assert_eq!(result, bpserror::bps_ok, "could not create patch");
+
+            // apply patch
+            let mut mem_out = mem::default();
+            let result = super::bps_apply(mem_patch, source.to_mem(), &mut mem_out as *mut mem, &mut mem::default() as *mut mem, false);
+            assert_eq!(result, bpserror::bps_ok, "could not apply patch");
+
+            // check
+            mem_out.as_ref() == target.deref()
+        }
+    }
+
+    #[quickcheck_macros::quickcheck]
+    fn check_create_delta_and_apply(mut source: ArbitraryBuffer, mut target: ArbitraryBuffer) -> bool {
+        if source == target {
+            return true;
+        }
+
+        unsafe {
+            // create patch
+            let mut mem_patch = mem::default();
+            let result = super::bps_create_delta_inmem(source.to_mem(), target.to_mem(), mem::default(), &mut mem_patch as *mut mem, core::ptr::null(), core::ptr::null(), false);
             assert_eq!(result, bpserror::bps_ok, "could not create patch");
 
             // apply patch

@@ -1,11 +1,47 @@
 extern crate flips;
 
+use flips::BpsLinearBuilder;
+use flips::BpsDeltaBuilder;
+
 const DATA1: &[u8] = include_bytes!("data/data1.bin");
 const DATA2: &[u8] = include_bytes!("data/data2.bin");
 const DATA3: &[u8] = include_bytes!("data/data3.bin");
 
 const PATCH_1TO2: &[u8] = include_bytes!("data/patch1to2.bps");
 const PATCH_2TO1: &[u8] = include_bytes!("data/patch2to1.bps");
+
+macro_rules! make_test {
+    ($name:ident, $patcher:ident) => {
+        mod $name {
+            use super::*;
+
+            #[test]
+            fn test_create_apply() {
+                let patch = $patcher::new().source(DATA1).target(DATA2).build().unwrap();
+                let output = patch.apply(DATA1).unwrap();
+                assert_eq!(output.as_ref(), DATA2);
+            }
+
+            #[test]
+            fn test_create_identical() {
+                let result = $patcher::new().source(DATA1).target(DATA1).build();
+                assert_eq!(result.unwrap_err(), flips::Error::Identical);
+                let result = $patcher::new().source(DATA2).target(DATA2).build();
+                assert_eq!(result.unwrap_err(), flips::Error::Identical);
+            }
+
+            #[test]
+            fn test_create_missing_arguments() {
+                let result = $patcher::<&[u8], &[u8]>::new().build();
+                assert_eq!(result.unwrap_err(), flips::Error::Canceled);
+                let result = $patcher::<&[u8], &[u8]>::new().source(DATA1).build();
+                assert_eq!(result.unwrap_err(), flips::Error::Canceled);
+                let result = $patcher::<&[u8], &[u8]>::new().target(DATA1).build();
+                assert_eq!(result.unwrap_err(), flips::Error::Canceled);
+            }
+        }
+    }
+}
 
 #[test]
 fn test_apply_correct() {
@@ -37,27 +73,5 @@ fn test_apply_invalid() {
     assert_eq!(study.unwrap_err(), flips::Error::Invalid);
 }
 
-#[test]
-fn test_create_apply() {
-    let patch = flips::BpsBuilder::new().source(DATA1).target(DATA2).build().unwrap();
-    let output = patch.apply(DATA1).unwrap();
-    assert_eq!(output.as_ref(), DATA2);
-}
-
-#[test]
-fn test_create_identical() {
-    let result = flips::BpsBuilder::new().source(DATA1).target(DATA1).build();
-    assert_eq!(result.unwrap_err(), flips::Error::Identical);
-    let result = flips::BpsBuilder::new().source(DATA2).target(DATA2).build();
-    assert_eq!(result.unwrap_err(), flips::Error::Identical);
-}
-
-#[test]
-fn test_create_missing_arguments() {
-    let result = flips::BpsBuilder::<&[u8], &[u8]>::new().build();
-    assert_eq!(result.unwrap_err(), flips::Error::Canceled);
-    let result = flips::BpsBuilder::<&[u8], &[u8]>::new().source(DATA1).build();
-    assert_eq!(result.unwrap_err(), flips::Error::Canceled);
-    let result = flips::BpsBuilder::<&[u8], &[u8]>::new().target(DATA1).build();
-    assert_eq!(result.unwrap_err(), flips::Error::Canceled);
-}
+make_test!(linear, BpsLinearBuilder);
+make_test!(delta, BpsDeltaBuilder);
