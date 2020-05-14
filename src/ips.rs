@@ -59,6 +59,12 @@ impl<B: AsRef<[u8]>> IpsPatch<B> {
     }
 }
 
+impl<B: AsRef<[u8]>> AsRef<[u8]> for IpsPatch<B> {
+    fn as_ref(&self) -> &[u8] {
+        self.buffer.as_ref()
+    }
+}
+
 // ---------------------------------------------------------------------------
 
 /// The output created by the application of an IPS patch.

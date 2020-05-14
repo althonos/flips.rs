@@ -43,6 +43,12 @@ impl<B: AsRef<[u8]>> BpsPatch<B> {
     }
 }
 
+impl<B: AsRef<[u8]>> AsRef<[u8]> for BpsPatch<B> {
+    fn as_ref(&self) -> &[u8] {
+        self.buffer.as_ref()
+    }
+}
+
 // ---------------------------------------------------------------------------
 
 /// The output created by the application of a BPS patch.

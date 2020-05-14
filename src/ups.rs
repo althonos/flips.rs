@@ -42,6 +42,12 @@ impl<B: AsRef<[u8]>> UpsPatch<B> {
     }
 }
 
+impl<B: AsRef<[u8]>> AsRef<[u8]> for UpsPatch<B> {
+    fn as_ref(&self) -> &[u8] {
+        self.buffer.as_ref()
+    }
+}
+
 // ---------------------------------------------------------------------------
 
 /// The output created by the application of a UPS patch.
