@@ -3,7 +3,7 @@ members = ["flips-sys"]
 
 [package]
 name = "flips"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
 license = "GPL-3.0"
@@ -25,7 +25,7 @@ status     = "actively-developed"
 
 [dependencies.flips-sys]
 path = "./flips-sys"
-version = "0.2.0"
+version = "0.2.1"
 default-features = false
 [dependencies.err-derive]
 version = "0.2.3"

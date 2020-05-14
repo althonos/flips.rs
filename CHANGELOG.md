@@ -6,7 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/flips.rs/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/althonos/flips.rs/compare/v0.2.1...HEAD
+
+## [v0.2.1] - 2020-05-14
+[v0.2.1]: https://github.com/althonos/flips.rs/compare/v0.2.0...v0.2.1
+### Added
+- Missing `AsRef<[u8]>` implementation for patch types 
+  ([#1](https://github.com/althonos/flips.rs/issues/1)).
 
 ## [v0.2.0] - 2020-04-05
 [v0.2.0]: https://github.com/althonos/flips.rs/compare/v0.1.0...v0.2.0
