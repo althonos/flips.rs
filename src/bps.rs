@@ -53,6 +53,7 @@ impl<B: AsRef<[u8]>> AsRef<[u8]> for BpsPatch<B> {
 
 /// The output created by the application of a BPS patch.
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct BpsOutput {
     mem: FlipsMemory,
     metadata: Option<FlipsMemory>,

@@ -49,7 +49,7 @@ impl PartialEq for ArbitraryBuffer {
 }
 
 impl quickcheck::Arbitrary for ArbitraryBuffer {
-    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+    fn arbitrary(g: &mut quickcheck::Gen) -> Self {
         let mut buffer = Self::default();
         for i in 0..buffer.buffer[..].len() {
             buffer.buffer[i] = u8::arbitrary(g);
