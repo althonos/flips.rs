@@ -8,7 +8,7 @@ fn main() {
     let ref flips = cwd.join("flips");
     let ref patched = std::path::PathBuf::from(out).join("flips");
 
-    // copy C++ sources refering to `crc32.h` locally to a different folder
+    // copy C++ sources referring to `crc32.h` locally to a different folder
     // to force them to use the one we defined in `src`.
     std::fs::create_dir_all(patched).ok();
     for name in &["libups.cpp", "libbps.cpp", "libbps-suf.cpp"] {
